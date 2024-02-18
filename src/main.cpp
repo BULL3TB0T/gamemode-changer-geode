@@ -11,6 +11,7 @@ class $modify(PlayerObject)
 {
 	void preCollision()
 	{
+		PlayerObject::preCollision();
 		auto gameManager = GameManager::sharedState();
 		auto gameLayer = gameManager->getGameLayer();
 		auto playLayer = gameManager->getPlayLayer();
@@ -54,7 +55,7 @@ class $modify(PauseLayer)
 {
 	void customSetup()
 	{
-		customSetup();
+		PauseLayer::customSetup();
 		if (!player_1 || !player_2) return;
 		auto menu = getChildByID("left-button-menu");
 		auto sprite = createSprite();
