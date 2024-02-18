@@ -23,31 +23,15 @@ class $modify(PlayerObject)
 	}
 };
 
-CCSprite* sprite;
-CCSprite* createSprite()
-{
-	sprite = CCSprite::createWithSpriteFrameName(player_1->m_isPlatformer || player_2->m_isPlatformer ? "GJ_checkOn_001.png" : "GJ_checkOff_001.png");
-	return sprite;
-}
-void updateSprite()
-{
-	auto parent = sprite->getParent();
-	auto pos = sprite->getPosition();
-	parent->removeChild(sprite, true);
-	auto sprite = createSprite();
-	sprite->setPosition(pos);
-	parent->addChild(sprite);
-}
-
 class MenuSelectorBypass
 {
 public:
-	void togglePlatformer(CCObject*)
+	void togglePlatformer(CCObject* sender)
 	{
 		bool value = !(player_1->m_isPlatformer || player_2->m_isPlatformer);
 		if (player_1) player_1->togglePlatformerMode(value);
 		if (player_2) player_2->togglePlatformerMode(value);
-		updateSprite();
+		static_cast<CCMenuItemToggler*>(sender)->toggle(!value);
 	}
 };
 
@@ -57,12 +41,18 @@ class $modify(PauseLayer)
 	{
 		PauseLayer::customSetup();
 		if (!player_1 || !player_2) return;
-		auto menu = getChildByID("left-button-menu");
-		auto sprite = createSprite();
-		auto btn = CCMenuItemSpriteExtra::create(sprite, this, menu_selector(MenuSelectorBypass::togglePlatformer));
-		btn->setPosition(menu->getContentSize().width / 2, menu->getContentSize().height - (sprite->getTextureRect().size.height / 2));
-		auto pos = btn->getPosition();
-		menu->addChild(btn);
+		bool value = player_1->m_isPlatformer || player_2->m_isPlatformer;
+		auto menu = CCMenu::create();
+		menu->setPosition(0, 0);
+		addChild(menu);
+		CCSize windowSize = CCDirector::sharedDirector()->getWinSize();
+		auto sprite = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
+		auto toggle = CCMenuItemToggler::create(sprite, CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"), this, menu_selector(MenuSelectorBypass::togglePlatformer));
+		toggle->toggle(value);
+		auto background = getChildByID("background");
+		toggle->setPosition(sprite->getTextureRect().size.width, windowSize.height - background->getContentSize().height + (sprite->getTextureRect().size.height / 2));
+		CCPoint pos = toggle->getPosition();
+		menu->addChild(toggle);
 		auto label = CCLabelBMFont::create("Platformer", "bigFont-hd.fnt");
 		label->setScale(0.9f);
 		label->setPosition(pos.x + (label->getContentSize().width / 1.5), pos.y);
