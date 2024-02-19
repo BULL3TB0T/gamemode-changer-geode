@@ -1,6 +1,6 @@
 # v1.0.3
 
- + Moved the button to the game options menu 
+ + Moved the button to the game pause options menu 
 
 # v1.0.2
 
