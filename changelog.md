@@ -1,3 +1,7 @@
+# v1.0.3
+
+ + Moved the button to the game options menu 
+
 # v1.0.2
 
  + Fixed some bugs with mods

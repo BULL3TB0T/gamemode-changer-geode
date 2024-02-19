@@ -37,35 +37,52 @@ public:
 
 class $modify(PauseLayer)
 {
-	void customSetup()
+	void onSettings(CCObject* p0)
 	{
-		PauseLayer::customSetup();
-		if (!player_1 || !player_2) return;
-		bool value = player_1->m_isPlatformer || player_2->m_isPlatformer;
-		auto menu = CCMenu::create();
-		menu->setPosition(0, 0);
-		addChild(menu);
-		CCSize windowSize = CCDirector::sharedDirector()->getWinSize();
-		auto sprite = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
-		auto toggle = CCMenuItemToggler::create(sprite, CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"), this, menu_selector(MenuSelectorBypass::togglePlatformer));
-		toggle->toggle(value);
-		auto background = getChildByID("background");
-		toggle->setPosition(sprite->getTextureRect().size.width, windowSize.height - background->getContentSize().height + (sprite->getTextureRect().size.height / 2));
-		CCPoint pos = toggle->getPosition();
-		menu->addChild(toggle);
-		auto label = CCLabelBMFont::create("Platformer", "bigFont-hd.fnt");
-		label->setScale(0.9f);
-		label->setPosition(pos.x + (label->getContentSize().width / 1.5), pos.y);
-		menu->addChild(label);
+		PauseLayer::onSettings(p0);
+		CCObject* obj;
+		CCARRAY_FOREACH(CCDirector::sharedDirector()->getRunningScene()->getChildren(), obj)
+		{
+			if (auto gameOptions = typeinfo_cast<GameOptionsLayer*>(obj))
+			{
+				CCSize windowSize = CCDirector::sharedDirector()->getWinSize();
+				auto menu = gameOptions->m_buttonMenu;
+				if (player_1 || player_2)
+				{
+					bool value = player_1->m_isPlatformer || player_2->m_isPlatformer;
+					auto off = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
+					off->setScale(0.8f);
+					auto on = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
+					on->setScale(0.8f);
+					auto toggle = CCMenuItemToggler::create(off, on, gameOptions->m_mainLayer, menu_selector(MenuSelectorBypass::togglePlatformer));
+					toggle->toggle(value);
+					toggle->setPosition(0, -windowSize.height / 2.75f);
+					CCPoint pos = toggle->getPosition();
+					menu->addChild(toggle);
+					auto label = CCLabelBMFont::create("Platformer", "bigFont-uhd.fnt");
+					label->setScale(0.4f);
+					label->setPosition(pos.x + (off->getTextureRect().size.width * 1.95f), pos.y);
+					menu->addChild(label);
+				}
+				else
+				{
+					auto label = CCLabelBMFont::create("Waiting for player to spawn to set platformer.", "bigFont-uhd.fnt");
+					label->setScale(0.4f);
+					label->setPosition(0, -windowSize.height / 2.75f);
+					menu->addChild(label);
+				}
+			}
+		}
 	}
 };
 
 class $modify(PlayLayer)
 {
-	void destructor()
+	bool init(GJGameLevel* p0, bool p1, bool p2)
 	{
-		PlayLayer::~PlayLayer();
-		player_1 = nullptr;
-		player_2 = nullptr;
+		if (!PlayLayer::init(p0, p1, p2)) return false;
+		if (player_1) player_1 = nullptr;
+		if (player_2) player_2 = nullptr;
+		return true;
 	}
 };
